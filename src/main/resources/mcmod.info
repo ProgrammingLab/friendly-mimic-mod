@@ -1,0 +1,16 @@
+[
+{
+  "modid": "friendly-mimic-mod",
+  "name": "Friendly Mimic Mod",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["gedorinku"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
