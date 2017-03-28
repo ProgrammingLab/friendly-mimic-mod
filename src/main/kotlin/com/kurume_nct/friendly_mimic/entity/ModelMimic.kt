@@ -26,6 +26,7 @@ class ModelMimic : ModelChest() {
     }
 
     override fun render(entityIn: Entity?, limbSwing: Float, limbSwingAmount: Float, ageInTicks: Float, netHeadYaw: Float, headPitch: Float, scale: Float) {
+        chestLid.rotateAngleX = (entityIn as EntityMimic).lidAngle
         renderAll()
         super.render(entityIn, limbSwing, limbSwingAmount, ageInTicks, netHeadYaw, headPitch, scale)
     }

@@ -6,21 +6,25 @@ import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityAgeable
 import net.minecraft.entity.SharedMonsterAttributes
 import net.minecraft.entity.ai.*
-import net.minecraft.entity.monster.AbstractSkeleton
-import net.minecraft.entity.monster.EntityMob
 import net.minecraft.entity.passive.EntityTameable
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.projectile.EntityArrow
-import net.minecraft.item.ItemFood
 import net.minecraft.item.ItemStack
 import net.minecraft.util.DamageSource
 import net.minecraft.util.EnumHand
 import net.minecraft.world.World
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 
 /**
  * Created by gedorinku on 2017/03/27.
  */
 class EntityMimic : EntityTameable {
+
+    var lidAngle = 0.0f
+    var lidAngleTarget = 0.0f
+        get
+        private set
 
     constructor(world: World) : super(world) {
         setSize(1.0f, 1.0f)
@@ -48,6 +52,7 @@ class EntityMimic : EntityTameable {
 
         val entity = source?.entity
         aiSit?.setSitting(false)
+        openLidHalf()
         return super.attackEntityFrom(source,
                 if (entity != null && entity !is EntityPlayer && entity !is EntityArrow) {
                     (amount + 1.0f) / 2.0f
@@ -79,6 +84,7 @@ class EntityMimic : EntityTameable {
                     itemStack.shrink(1)
                 }
                 heal(4.0f)
+                openLidHalf()
 
                 return true
             }
@@ -136,8 +142,19 @@ class EntityMimic : EntityTameable {
         attributeMap.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).baseValue = 2.0
     }
 
+    @SideOnly(Side.CLIENT)
+    fun openLidHalf() {
+        lidAngleTarget = LID_ANGLE_HALF_OPEN
+    }
+
+    @SideOnly(Side.CLIENT)
+    fun closeLid() {
+        lidAngleTarget = 0.0f
+    }
+
     companion object {
         const val HEALTH_FRIENDLY = 20.0
         const val HEALTH = 8.0
+        const val LID_ANGLE_HALF_OPEN = -(Math.PI / 4.0).toFloat()
     }
 }
