@@ -1,5 +1,6 @@
 package com.kurume_nct.friendly_mimic.entity
 
+import com.kurume_nct.friendly_mimic.FriendlyMimicMod
 import net.minecraft.client.renderer.entity.RenderLiving
 import net.minecraft.client.renderer.entity.RenderManager
 import net.minecraft.util.ResourceLocation
@@ -29,9 +30,11 @@ class RenderMimic(manager: RenderManager) : RenderLiving<EntityMimic>(manager, M
         super.doRender(entity, x, y, z, entityYaw, partialTicks)
     }
 
-    override fun getEntityTexture(entity: EntityMimic?): ResourceLocation? = MIMIC_TEXTURES
+    override fun getEntityTexture(entity: EntityMimic?): ResourceLocation? =
+            if (entity!!.isTamed) MIMIC_TAMED_TEXTURES else MIMIC_TEXTURES
 
     companion object {
-        private val MIMIC_TEXTURES = ResourceLocation("textures/entity/chest/normal.png")
+        private val MIMIC_TEXTURES = ResourceLocation(FriendlyMimicMod.MODID, "textures/entity/chest/normal.png")
+        private val MIMIC_TAMED_TEXTURES = ResourceLocation(FriendlyMimicMod.MODID, "textures/entity/chest/tamed.png")
     }
 }
