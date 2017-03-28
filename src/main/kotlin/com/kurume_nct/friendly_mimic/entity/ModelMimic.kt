@@ -2,10 +2,13 @@ package com.kurume_nct.friendly_mimic.entity
 
 import net.minecraft.client.model.ModelChest
 import net.minecraft.entity.Entity
+import net.minecraftforge.fml.relauncher.Side
+import net.minecraftforge.fml.relauncher.SideOnly
 
 /**
  * Created by gedorinku on 2017/03/27.
  */
+@SideOnly(Side.CLIENT)
 class ModelMimic : ModelChest() {
 
     init {
