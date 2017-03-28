@@ -1,18 +1,88 @@
 package com.kurume_nct.friendly_mimic.entity
 
+import net.minecraft.block.BlockChest
+import net.minecraft.entity.Entity
+import net.minecraft.entity.EntityAgeable
+import net.minecraft.entity.SharedMonsterAttributes
+import net.minecraft.entity.ai.*
+import net.minecraft.entity.monster.AbstractSkeleton
 import net.minecraft.entity.monster.EntityMob
+import net.minecraft.entity.passive.EntityTameable
+import net.minecraft.entity.player.EntityPlayer
+import net.minecraft.entity.projectile.EntityArrow
+import net.minecraft.item.ItemStack
+import net.minecraft.util.DamageSource
 import net.minecraft.world.World
 
 /**
  * Created by gedorinku on 2017/03/27.
  */
-class EntityMimic : EntityMob {
+class EntityMimic : EntityTameable {
 
     constructor(world: World) : super(world) {
         setSize(1.0f, 1.0f)
+        isTamed = false
     }
 
     override fun initEntityAI() {
-        //TODO()
+        aiSit = EntityAISit(this)
+        tasks.addTask(1, aiSit)
+        tasks.addTask(2, EntityAILeapAtTarget(this, 0.4f))
+        tasks.addTask(3, EntityAIAttackMelee(this, 1.0, true))
+        tasks.addTask(4, EntityAIWanderAvoidWater(this, 1.0))
+        this.targetTasks.addTask(1, EntityAIOwnerHurtByTarget(this))
+        this.targetTasks.addTask(2, EntityAIOwnerHurtTarget(this))
+        this.targetTasks.addTask(3, EntityAIHurtByTarget(this, true, *arrayOfNulls<Class<*>>(0)))
+        this.targetTasks.addTask(4, EntityAIFindEntityNearestPlayer(this))
+    }
+
+    override fun attackEntityFrom(source: DamageSource?, amount: Float): Boolean {
+        if (isEntityInvulnerable(source)) {
+            return false
+        }
+
+        val entity = source?.entity
+        aiSit?.setSitting(false)
+        return super.attackEntityFrom(source,
+                if (entity != null && entity !is EntityPlayer && entity !is EntityArrow) {
+                    (amount + 1.0f) / 2.0f
+                } else {
+                    amount
+                })
+    }
+
+    override fun attackEntityAsMob(entityIn: Entity?): Boolean {
+        val flag = entityIn?.attackEntityFrom(
+                DamageSource.causeMobDamage(this),
+                this.getEntityAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).attributeValue.toInt().toFloat())
+                ?: return false
+
+        if (flag) {
+            this.applyEnchantments(this, entityIn)
+        }
+
+        return flag
+    }
+
+    override fun isBreedingItem(stack: ItemStack?): Boolean = TODO("BlockChestだとうまくいかない??")
+
+    override fun createChild(ageable: EntityAgeable?): EntityAgeable? {
+        val mimic = EntityMimic(world)
+        val uuid = ownerId
+        if (uuid != null) {
+            mimic.ownerId = uuid
+            mimic.isTamed = true
+        }
+
+        return mimic
+    }
+
+    override fun applyEntityAttributes() {
+        super.applyEntityAttributes()
+
+        getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).baseValue = 0.30000001192092896
+        getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).baseValue = if (isTamed) 20.0 else 8.0
+
+        attributeMap.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).baseValue = 2.0
     }
 }
