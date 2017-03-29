@@ -8,9 +8,9 @@ import net.minecraft.item.ItemStack
 /**
  * Created by gedorinku on 2017/03/28.
  */
-class ContainerMimicInventory(inventoryPlayer: InventoryPlayer, x: Int, y: Int, z: Int) : Container() {
+class ContainerMimicInventory(inventoryPlayer: InventoryPlayer) : Container() {
 
-    private val inventory: MimicInventory = MimicInventory(inventoryPlayer.player.world, x, y, z)
+    private val inventory: MimicInventory = MimicInventory(inventoryPlayer.player.world)
 
     init {
         inventory.openInventory(inventoryPlayer.player)

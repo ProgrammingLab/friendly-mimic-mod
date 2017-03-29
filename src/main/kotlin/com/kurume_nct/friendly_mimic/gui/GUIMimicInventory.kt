@@ -9,10 +9,8 @@ import org.lwjgl.opengl.GL11
 /**
  * Created by gedorinku on 2017/03/28.
  */
-class GUIMimicInventory(
-        inventoryPlayer: InventoryPlayer,
-        x: Int, y: Int, z: Int)
-    : GuiContainer(ContainerMimicInventory(inventoryPlayer, x, y, z)) {
+class GUIMimicInventory(inventoryPlayer: InventoryPlayer)
+    : GuiContainer(ContainerMimicInventory(inventoryPlayer)) {
 
     init {
         ySize = 166

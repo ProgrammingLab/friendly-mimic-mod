@@ -11,12 +11,12 @@ import net.minecraftforge.fml.common.network.IGuiHandler
  */
 class GUIHandler : IGuiHandler {
     override fun getClientGuiElement(ID: Int, player: EntityPlayer?, world: World?, x: Int, y: Int, z: Int): Any? = when (ID) {
-        FriendlyMimicMod.MIMIC_GUI_ID -> GUIMimicInventory(player!!.inventory, x, y, z)
+        FriendlyMimicMod.MIMIC_GUI_ID -> GUIMimicInventory(player!!.inventory)
         else -> null
     }
 
     override fun getServerGuiElement(ID: Int, player: EntityPlayer?, world: World?, x: Int, y: Int, z: Int): Any? = when (ID) {
-        FriendlyMimicMod.MIMIC_GUI_ID -> ContainerMimicInventory(player!!.inventory, x, y, z)
+        FriendlyMimicMod.MIMIC_GUI_ID -> ContainerMimicInventory(player!!.inventory)
         else -> null
     }
 }

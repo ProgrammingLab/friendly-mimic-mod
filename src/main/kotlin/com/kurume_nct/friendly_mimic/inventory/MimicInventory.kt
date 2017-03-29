@@ -3,18 +3,12 @@ package com.kurume_nct.friendly_mimic.inventory
 import com.kurume_nct.friendly_mimic.entity.EntityMimic
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.inventory.InventoryBasic
-import net.minecraft.util.math.AxisAlignedBB
-import net.minecraft.util.math.BlockPos
 import net.minecraft.world.World
 
 /**
  * Created by gedorinku on 2017/03/28.
  */
-class MimicInventory(
-        private val world: World,
-        private val x: Int,
-        private val y: Int,
-        private val z: Int)
+class MimicInventory(private val world: World)
     : InventoryBasic("MimicInventory", false, 27) {
 
     private lateinit var mimic: EntityMimic
@@ -24,10 +18,10 @@ class MimicInventory(
 
         if (player == null || world.isRemote) return
 
-        var mimicOrNull = findMimic(player)
+        val mimicOrNull = findMimic(player)
         if (mimicOrNull == null) {
             closeInventory(player)
-            println("failed to find mimic. $x, $y, $z")
+            println("failed to find mimic.")
             return
         }
         mimic = mimicOrNull
