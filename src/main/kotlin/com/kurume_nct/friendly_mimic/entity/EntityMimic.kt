@@ -11,6 +11,7 @@ import net.minecraft.entity.passive.EntityTameable
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.projectile.EntityArrow
 import net.minecraft.init.Items
+import net.minecraft.init.SoundEvents
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
@@ -98,6 +99,7 @@ class EntityMimic : EntityTameable {
             }
 
             if (player.isSneaking) {
+                playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
                 openGUI(player)
                 return true
             }
@@ -178,11 +180,13 @@ class EntityMimic : EntityTameable {
     @SideOnly(Side.CLIENT)
     fun openLidHalf() {
         lidAngleTarget = LID_ANGLE_HALF_OPEN
+        playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
     }
 
     @SideOnly(Side.CLIENT)
     fun closeLid() {
         lidAngleTarget = 0.0f
+        playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
     }
 
     private fun openGUI(player: EntityPlayer) {
