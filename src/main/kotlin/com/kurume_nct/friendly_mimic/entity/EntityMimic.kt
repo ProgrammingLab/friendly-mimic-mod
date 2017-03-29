@@ -133,19 +133,9 @@ class EntityMimic : EntityTameable {
         return super.processInteract(player, hand)
     }
 
-    override fun isBreedingItem(stack: ItemStack?): Boolean =
-            isTamed && Block.getBlockFromItem(stack!!.item) is BlockChest
+    override fun isBreedingItem(stack: ItemStack?): Boolean = false
 
-    override fun createChild(ageable: EntityAgeable?): EntityAgeable? {
-        val mimic = EntityMimic(world)
-        val uuid = ownerId
-        if (uuid != null) {
-            mimic.ownerId = uuid
-            mimic.isTamed = true
-        }
-
-        return mimic
-    }
+    override fun createChild(ageable: EntityAgeable?): EntityAgeable? = null
 
     override fun writeEntityToNBT(compound: NBTTagCompound?) {
         super.writeEntityToNBT(compound)
