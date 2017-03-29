@@ -15,7 +15,7 @@ class GUIMimicInventory(
     : GuiContainer(ContainerMimicInventory(inventoryPlayer, x, y, z)) {
 
     init {
-        ySize = 222
+        ySize = 166
     }
 
     override fun drawGuiContainerForegroundLayer(mouseX: Int, mouseY: Int) {

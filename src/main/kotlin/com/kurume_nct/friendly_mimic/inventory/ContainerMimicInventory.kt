@@ -21,16 +21,14 @@ class ContainerMimicInventory(inventoryPlayer: InventoryPlayer, x: Int, y: Int, 
             }
         }
 
-        val base = 2 * 18 + 1
-
         for (j in 0..2) {
             for (k in 0..8) {
-                this.addSlotToContainer(net.minecraft.inventory.Slot(inventoryPlayer, k + j * 9 + 9, 8 + k * 18, 103 + j * 18 + base))
+                this.addSlotToContainer(net.minecraft.inventory.Slot(inventoryPlayer, k + j * 9 + 9, 8 + k * 18, 84 + j * 18))
             }
         }
 
         for (j in 0..8) {
-            this.addSlotToContainer(net.minecraft.inventory.Slot(inventoryPlayer, j, 8 + j * 18, 161 + base))
+            this.addSlotToContainer(net.minecraft.inventory.Slot(inventoryPlayer, j, 8 + j * 18, 142))
         }
     }
 
