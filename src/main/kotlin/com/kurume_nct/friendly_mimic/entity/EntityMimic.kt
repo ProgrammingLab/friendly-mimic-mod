@@ -152,13 +152,14 @@ class EntityMimic : EntityTameable {
 
         val tagList = NBTTagList()
         inventoryContents
-                .filter { !it.isEmpty }
-                .forEachIndexed { index, itemStack ->
-                    val tagCompound = NBTTagCompound()
-                    tagCompound.setByte("Slot", index.toByte())
-                    itemStack.writeToNBT(tagCompound)
-                    tagList.appendTag(tagCompound)
-                }
+                .forEachIndexed({ index, itemStack ->
+                    if (!itemStack.isEmpty) {
+                        val tagCompound = NBTTagCompound()
+                        tagCompound.setByte("Slot", index.toByte())
+                        itemStack.writeToNBT(tagCompound)
+                        tagList.appendTag(tagCompound)
+                    }
+                })
 
         compound!!.setTag("Items", tagList)
     }
