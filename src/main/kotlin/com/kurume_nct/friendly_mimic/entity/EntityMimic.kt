@@ -1,5 +1,8 @@
 package com.kurume_nct.friendly_mimic.entity
 
+import com.kurume_nct.friendly_mimic.FriendlyMimicMod
+import com.kurume_nct.friendly_mimic.forEach
+import com.kurume_nct.friendly_mimic.inventory.MimicInventoryTag
 import net.minecraft.block.Block
 import net.minecraft.block.BlockChest
 import net.minecraft.entity.Entity
@@ -10,6 +13,8 @@ import net.minecraft.entity.passive.EntityTameable
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.projectile.EntityArrow
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.NBTTagCompound
+import net.minecraft.nbt.NBTTagList
 import net.minecraft.util.DamageSource
 import net.minecraft.util.EnumHand
 import net.minecraft.world.World
@@ -25,6 +30,10 @@ class EntityMimic : EntityTameable {
     var lidAngleTarget = 0.0f
         get
         private set
+
+    val inventoryContents: Array<ItemStack> = Array<ItemStack>(27) {
+        ItemStack.EMPTY
+    }
 
     constructor(world: World) : super(world) {
         setSize(1.0f, 1.0f)
@@ -89,6 +98,11 @@ class EntityMimic : EntityTameable {
                 return true
             }
 
+            if (player.isSneaking) {
+                openGUI(player)
+                return true
+            }
+
             if (isOwner(player) && !world.isRemote && !isBreedingItem(itemStack)) {
                 aiSit?.setSitting(!isSitting)
                 isJumping = false
@@ -133,6 +147,35 @@ class EntityMimic : EntityTameable {
         return mimic
     }
 
+    override fun writeEntityToNBT(compound: NBTTagCompound?) {
+        super.writeEntityToNBT(compound)
+
+        val tagList = NBTTagList()
+        inventoryContents
+                .filter { !it.isEmpty }
+                .forEachIndexed { index, itemStack ->
+                    val tagCompound = NBTTagCompound()
+                    tagCompound.setByte("Slot", index.toByte())
+                    itemStack.writeToNBT(tagCompound)
+                    tagList.appendTag(tagCompound)
+                }
+
+        compound!!.setTag("Items", tagList)
+    }
+
+    override fun readEntityFromNBT(compound: NBTTagCompound?) {
+        super.readEntityFromNBT(compound)
+
+        //see net.minecraft.nbt.NBTBase.NBT_TYPES
+        val listType = 10
+        compound!!.getTagList("Items", listType).forEach {
+            val index = it.getByte("Slot").toInt()
+            if (index < inventoryContents.size) {
+                inventoryContents[index] = ItemStack(it)
+            }
+        }
+    }
+
     override fun applyEntityAttributes() {
         super.applyEntityAttributes()
 
@@ -150,6 +193,15 @@ class EntityMimic : EntityTameable {
     @SideOnly(Side.CLIENT)
     fun closeLid() {
         lidAngleTarget = 0.0f
+    }
+
+    private fun openGUI(player: EntityPlayer) {
+        tags.add(MimicInventoryTag.composeMimicInventoryTag(player.uniqueID))
+        player.openGui(
+                FriendlyMimicMod.instance,
+                FriendlyMimicMod.MIMIC_GUI_ID,
+                world,
+                player.posX.toInt(), player.posY.toInt(), player.posZ.toInt())
     }
 
     companion object {
