@@ -3,8 +3,6 @@ package com.kurume_nct.friendly_mimic.entity
 import com.kurume_nct.friendly_mimic.FriendlyMimicMod
 import com.kurume_nct.friendly_mimic.forEach
 import com.kurume_nct.friendly_mimic.inventory.MimicInventoryTag
-import net.minecraft.block.Block
-import net.minecraft.block.BlockChest
 import net.minecraft.entity.Entity
 import net.minecraft.entity.EntityAgeable
 import net.minecraft.entity.SharedMonsterAttributes
@@ -12,6 +10,7 @@ import net.minecraft.entity.ai.*
 import net.minecraft.entity.passive.EntityTameable
 import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.entity.projectile.EntityArrow
+import net.minecraft.init.Items
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
@@ -85,10 +84,10 @@ class EntityMimic : EntityTameable {
 
     override fun processInteract(player: EntityPlayer?, hand: EnumHand?): Boolean {
         val itemStack = player!!.getHeldItem(hand)
-        val heldChest = !itemStack.isEmpty && Block.getBlockFromItem(itemStack.item) is BlockChest
+        val holdingRottenFlesh = !itemStack.isEmpty && itemStack.item == Items.ROTTEN_FLESH
 
         if (isTamed) {
-            if (heldChest) {
+            if (holdingRottenFlesh) {
                 if (!player.capabilities.isCreativeMode) {
                     itemStack.shrink(1)
                 }
@@ -109,7 +108,7 @@ class EntityMimic : EntityTameable {
                 navigator.clearPathEntity()
                 attackTarget = null
             }
-        } else if (heldChest) {
+        } else if (holdingRottenFlesh) {
             if (!player.capabilities.isCreativeMode) {
                 itemStack.shrink(1)
             }
