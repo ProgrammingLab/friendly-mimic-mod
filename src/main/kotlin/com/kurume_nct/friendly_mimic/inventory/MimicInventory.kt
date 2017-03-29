@@ -24,14 +24,14 @@ class MimicInventory(
 
         if (player == null || world.isRemote) return
 
-        val mimicOrNull = findMimic(player)
+        var mimicOrNull = findMimic(player)
         if (mimicOrNull == null) {
             closeInventory(player)
             println("failed to find mimic. $x, $y, $z")
             return
         }
         mimic = mimicOrNull
-        mimic.tags.remove(MimicInventoryTag.composeMimicInventoryTag(player.uniqueID))
+        mimic.tags.remove(MimicInventoryTag.composeMimicInventoryTag(mimic))
 
         mimic.inventoryContents.forEachIndexed { index, itemStack -> setInventorySlotContents(index, itemStack) }
 
@@ -42,14 +42,13 @@ class MimicInventory(
         }
     }
 
-    private fun findMimic(player: EntityPlayer): EntityMimic? =
-            world.getEntitiesWithinAABB(
-                    EntityMimic::class.java,
-                    AxisAlignedBB(BlockPos(x - 8, y - 8, z - 8), BlockPos(x + 8, y + 8, z + 8)))
-                    .find {
-                        it.tags.any {
-                            MimicInventoryTag.isMimicInventoryTag(it) &&
-                                    MimicInventoryTag.getPlayerUUID(it) == player.uniqueID.toString()
-                        }
-                    }
+    private fun findMimic(player: EntityPlayer): EntityMimic? {
+        val uuids = player.tags
+                .filter { MimicInventoryTag.isMimicInventoryTag(it) }
+                .associate { Pair(it, MimicInventoryTag.getMimicUUID(it)) }
+                .values
+        val entities = world.getEntities(EntityMimic::class.java, { it!!.uniqueID.toString() in uuids })
+        if (entities.size == 0) return null
+        return entities.first()
+    }
 }

@@ -186,7 +186,7 @@ class EntityMimic : EntityTameable {
     }
 
     private fun openGUI(player: EntityPlayer) {
-        tags.add(MimicInventoryTag.composeMimicInventoryTag(player.uniqueID))
+        player.tags.add(MimicInventoryTag.composeMimicInventoryTag(this))
         player.openGui(
                 FriendlyMimicMod.instance,
                 FriendlyMimicMod.MIMIC_GUI_ID,

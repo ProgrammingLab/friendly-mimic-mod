@@ -1,6 +1,7 @@
 package com.kurume_nct.friendly_mimic.inventory
 
 import com.kurume_nct.friendly_mimic.FriendlyMimicMod
+import com.kurume_nct.friendly_mimic.entity.EntityMimic
 import java.util.*
 
 /**
@@ -8,11 +9,11 @@ import java.util.*
  */
 object MimicInventoryTag {
 
-    private const val HEADER = "${FriendlyMimicMod.MODID}:PLAYER_UUID:"
+    private const val HEADER = "${FriendlyMimicMod.MODID}:MIMIC_UUID:"
 
     fun isMimicInventoryTag(tag: String): Boolean = tag.startsWith(HEADER)
 
-    fun getPlayerUUID(tag: String): String {
+    fun getMimicUUID(tag: String): String {
         if (!isMimicInventoryTag(tag)) {
             throw IllegalArgumentException("Not a MimicInventoryTag:$tag")
         }
@@ -20,5 +21,5 @@ object MimicInventoryTag {
         return tag.subSequence(HEADER.length, tag.length).toString()
     }
 
-    fun composeMimicInventoryTag(playerUUID: UUID): String = HEADER + playerUUID.toString()
+    fun composeMimicInventoryTag(mimic: EntityMimic): String = HEADER + mimic.uniqueID.toString()
 }
