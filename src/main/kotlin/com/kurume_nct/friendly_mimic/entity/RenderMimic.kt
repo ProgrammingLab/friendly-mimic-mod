@@ -20,7 +20,6 @@ class RenderMimic(manager: RenderManager) : RenderLiving<EntityMimic>(manager, M
             val diff = lidAngleTarget - entity.lidAngle
             if (Math.abs(diff) <= motionSpeed) {
                 entity.lidAngle = lidAngleTarget
-                entity.closeLid()
                 return
             }
             val motion = partialTicks * motionSpeed * if (diff < 0) -1.0f else 1.0f

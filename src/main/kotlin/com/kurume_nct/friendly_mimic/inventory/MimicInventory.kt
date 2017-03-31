@@ -27,11 +27,14 @@ class MimicInventory(private val world: World)
         mimic = mimicOrNull
         mimic.tags.remove(MimicInventoryTag.composeMimicInventoryTag(mimic))
 
-        mimic.inventoryContents.forEachIndexed { index, itemStack -> setInventorySlotContents(index, itemStack) }
+        for (i in 0 until EntityMimic.INVENTORY_SIZE) {
+            val itemStack = mimic.getInventoryContent(i)
+            setInventorySlotContents(i, itemStack)
+        }
 
         addInventoryChangeListener {
-            mimic.inventoryContents.forEachIndexed { index, _ ->
-                mimic.inventoryContents[index] = getStackInSlot(index)
+            for (i in 0 until EntityMimic.INVENTORY_SIZE) {
+                mimic.setInventoryContent(i, getStackInSlot(i))
             }
         }
     }

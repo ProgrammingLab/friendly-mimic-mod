@@ -15,11 +15,12 @@ import net.minecraft.init.SoundEvents
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.NBTTagCompound
 import net.minecraft.nbt.NBTTagList
+import net.minecraft.network.datasync.DataParameter
+import net.minecraft.network.datasync.DataSerializers
+import net.minecraft.network.datasync.EntityDataManager
 import net.minecraft.util.DamageSource
 import net.minecraft.util.EnumHand
 import net.minecraft.world.World
-import net.minecraftforge.fml.relauncher.Side
-import net.minecraftforge.fml.relauncher.SideOnly
 
 /**
  * Created by gedorinku on 2017/03/27.
@@ -27,17 +28,35 @@ import net.minecraftforge.fml.relauncher.SideOnly
 class EntityMimic : EntityTameable {
 
     var lidAngle = 0.0f
-    var lidAngleTarget = 0.0f
-        get
-        private set
-
-    val inventoryContents: Array<ItemStack> = Array<ItemStack>(27) {
-        ItemStack.EMPTY
-    }
+    var lidAngleTarget
+        get() = dataManager.get(LID_ANGLE_TARGET)
+        private set(value) = dataManager.set(LID_ANGLE_TARGET, value)
+    var lidAnimationTick: Int = 0
 
     constructor(world: World) : super(world) {
         setSize(1.0f, 1.0f)
         isTamed = false
+    }
+
+    override fun entityInit() {
+        super.entityInit()
+
+        dataManager.register(LID_ANGLE_TARGET, 0.0f)
+        for (i in 0 until INVENTORY_SIZE) {
+            dataManager.register(INVENTORY_CONTENTS[i], ItemStack.EMPTY)
+        }
+    }
+
+    override fun onUpdate() {
+        super.onUpdate()
+
+        if (lidAnimationTick != 0 || lidAngleTarget != 0.0f) {
+            lidAnimationTick--
+            if (lidAnimationTick <= 0) {
+                lidAnimationTick = 0
+                closeLid()
+            }
+        }
     }
 
     override fun initEntityAI() {
@@ -142,17 +161,18 @@ class EntityMimic : EntityTameable {
         super.writeEntityToNBT(compound)
 
         val tagList = NBTTagList()
-        inventoryContents
-                .forEachIndexed({ index, itemStack ->
-                    if (!itemStack.isEmpty) {
-                        val tagCompound = NBTTagCompound()
-                        tagCompound.setByte("Slot", index.toByte())
-                        itemStack.writeToNBT(tagCompound)
-                        tagList.appendTag(tagCompound)
-                    }
-                })
+        for (i in 0 until INVENTORY_SIZE) {
+            val itemStack = getInventoryContent(i)
+            if (itemStack.isEmpty) continue
+            val tagCompound = NBTTagCompound()
+            tagCompound.setByte(KEY_SLOT, i.toByte())
+            itemStack.writeToNBT(tagCompound)
+            tagList.appendTag(tagCompound)
+        }
 
-        compound!!.setTag("Items", tagList)
+        compound!!.setTag(KEY_ITEMS, tagList)
+
+        compound.setFloat(KEY_LID_ANGLE_TARGET, lidAngleTarget)
     }
 
     override fun readEntityFromNBT(compound: NBTTagCompound?) {
@@ -160,12 +180,14 @@ class EntityMimic : EntityTameable {
 
         //see net.minecraft.nbt.NBTBase.NBT_TYPES
         val listType = 10
-        compound!!.getTagList("Items", listType).forEach {
-            val index = it.getByte("Slot").toInt()
-            if (index < inventoryContents.size) {
-                inventoryContents[index] = ItemStack(it)
+        compound!!.getTagList(KEY_ITEMS, listType).forEach {
+            val index = it.getByte(KEY_SLOT).toInt()
+            if (index < INVENTORY_SIZE) {
+                setInventoryContent(index, ItemStack(it))
             }
         }
+
+        lidAngleTarget = compound.getFloat(KEY_LID_ANGLE_TARGET)
     }
 
     override fun applyEntityAttributes() {
@@ -177,14 +199,21 @@ class EntityMimic : EntityTameable {
         attributeMap.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).baseValue = 2.0
     }
 
-    @SideOnly(Side.CLIENT)
+    fun getInventoryContent(index: Int): ItemStack = dataManager.get(INVENTORY_CONTENTS[index])
+
+    fun setInventoryContent(index: Int, itemStack: ItemStack) = dataManager.set(INVENTORY_CONTENTS[index], itemStack)
+
     fun openLidHalf() {
+        if (world.isRemote) return
+
         lidAngleTarget = LID_ANGLE_HALF_OPEN
+        lidAnimationTick = 8
         playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
     }
 
-    @SideOnly(Side.CLIENT)
     fun closeLid() {
+        if (world.isRemote) return
+
         lidAngleTarget = 0.0f
         playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
     }
@@ -202,5 +231,17 @@ class EntityMimic : EntityTameable {
         const val HEALTH_FRIENDLY = 20.0
         const val HEALTH = 8.0
         const val LID_ANGLE_HALF_OPEN = -(Math.PI / 4.0).toFloat()
+        const val INVENTORY_SIZE = 27
+
+        private const val KEY_ITEMS = "Items"
+        private const val KEY_SLOT = "Slot"
+        private const val KEY_LID_ANGLE_TARGET = "LidAngleTarget"
+
+        private val LID_ANGLE_TARGET = EntityDataManager.createKey<Float>(
+                EntityMimic::class.java, DataSerializers.FLOAT
+        )
+        private val INVENTORY_CONTENTS = Array<DataParameter<ItemStack>>(INVENTORY_SIZE) {
+            EntityDataManager.createKey<ItemStack>(EntityMimic::class.java, DataSerializers.OPTIONAL_ITEM_STACK)
+        }
     }
 }
