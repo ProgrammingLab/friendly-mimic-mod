@@ -63,7 +63,7 @@ class EntityMimic : EntityTameable {
         aiSit = EntityAISit(this)
         tasks.addTask(1, EntityAISwimming(this))
         tasks.addTask(2, aiSit)
-        tasks.addTask(3, EntityAILeapAtTarget(this, 0.4f))
+        tasks.addTask(3, EntityMimicAILeapAtTarget(this, 0.4f))
         tasks.addTask(4, EntityAIAttackMelee(this, 1.0, true))
         tasks.addTask(5, EntityAIFollowOwner(this, 1.0, 10.0f, 2.0f))
         tasks.addTask(6, EntityAIWanderAvoidWater(this, 1.0))
