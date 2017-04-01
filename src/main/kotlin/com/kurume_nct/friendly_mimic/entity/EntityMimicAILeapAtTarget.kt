@@ -12,6 +12,5 @@ class EntityMimicAILeapAtTarget(private val entityMimic: EntityMimic, leapMotion
         super.startExecuting()
 
         entityMimic.openLidHalf(true)
-        println("leap")
     }
 }
