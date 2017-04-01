@@ -210,6 +210,18 @@ class EntityMimic : EntityTameable {
         attributeMap.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).baseValue = 2.0
     }
 
+    override fun onDeath(cause: DamageSource?) {
+        super.onDeath(cause)
+
+        if (world.isRemote || !isTamed) return
+        (0 until INVENTORY_SIZE)
+                .map { getInventoryContent(it) }
+                .filterNot { it.isEmpty }
+                .forEach {
+                    dropItem(it.item, it.count)!!.setEntityItemStack(it)
+                }
+    }
+
     fun getInventoryContent(index: Int): ItemStack = dataManager.get(INVENTORY_CONTENTS[index])
 
     fun setInventoryContent(index: Int, itemStack: ItemStack) = dataManager.set(INVENTORY_CONTENTS[index], itemStack)
