@@ -11,7 +11,7 @@ class EntityMimicAILeapAtTarget(private val entityMimic: EntityMimic, leapMotion
     override fun startExecuting() {
         super.startExecuting()
 
-        entityMimic.openLidHalf()
+        entityMimic.openLidHalf(true)
         println("leap")
     }
 }

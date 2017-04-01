@@ -39,6 +39,13 @@ class MimicInventory(private val world: World)
         }
     }
 
+    override fun closeInventory(player: EntityPlayer?) {
+        super.closeInventory(player)
+
+        if (player == null || world.isRemote) return
+        mimic.inventoryOpenCount--
+    }
+
     private fun findMimic(player: EntityPlayer): EntityMimic? {
         val uuids = player.tags
                 .filter { MimicInventoryTag.isMimicInventoryTag(it) }

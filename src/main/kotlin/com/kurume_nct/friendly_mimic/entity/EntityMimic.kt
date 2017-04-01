@@ -33,6 +33,10 @@ class EntityMimic : EntityTameable {
         private set(value) = dataManager.set(LID_ANGLE_TARGET, value)
     var lidAnimationTick: Int = 0
 
+    var inventoryOpenCount
+        get() = dataManager.get(INVENTORY_OPEN_COUNT)
+        set(value) = dataManager.set(INVENTORY_OPEN_COUNT, value)
+
     constructor(world: World) : super(world) {
         setSize(1.0f, 1.0f)
         isTamed = false
@@ -45,17 +49,24 @@ class EntityMimic : EntityTameable {
         for (i in 0 until INVENTORY_SIZE) {
             dataManager.register(INVENTORY_CONTENTS[i], ItemStack.EMPTY)
         }
+        dataManager.register(INVENTORY_OPEN_COUNT, 0)
     }
 
     override fun onUpdate() {
         super.onUpdate()
 
+        if (world.isRemote) return
+
         if (lidAnimationTick != 0 || lidAngleTarget != 0.0f) {
             lidAnimationTick--
             if (lidAnimationTick <= 0) {
                 lidAnimationTick = 0
-                closeLid()
+                closeLid(true)
             }
+        }
+
+        if (0 < inventoryOpenCount) {
+            openLidFull(false)
         }
     }
 
@@ -80,7 +91,7 @@ class EntityMimic : EntityTameable {
 
         val entity = source?.entity
         aiSit?.setSitting(false)
-        openLidHalf()
+        openLidHalf(true)
         return super.attackEntityFrom(source,
                 if (entity != null && entity !is EntityPlayer && entity !is EntityArrow) {
                     (amount + 1.0f) / 2.0f
@@ -112,7 +123,7 @@ class EntityMimic : EntityTameable {
                     itemStack.shrink(1)
                 }
                 heal(4.0f)
-                openLidHalf()
+                openLidHalf(true)
 
                 return true
             }
@@ -203,23 +214,31 @@ class EntityMimic : EntityTameable {
 
     fun setInventoryContent(index: Int, itemStack: ItemStack) = dataManager.set(INVENTORY_CONTENTS[index], itemStack)
 
-    fun openLidHalf() {
+    fun openLidHalf(sound: Boolean) = openLid(LID_ANGLE_HALF, sound)
+
+    fun openLidFull(sound: Boolean) = openLid(LID_ANGLE_FULL, sound)
+
+    fun openLid(angle: Float, sound: Boolean) {
         if (world.isRemote) return
 
-        lidAngleTarget = LID_ANGLE_HALF_OPEN
-        lidAnimationTick = 8
-        playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
+        lidAngleTarget = angle
+        lidAnimationTick = Math.abs(angle / 0.1f + 0.5).toInt()
+        if (sound) playLidSound()
     }
 
-    fun closeLid() {
+    fun closeLid(sound: Boolean) {
         if (world.isRemote) return
 
         lidAngleTarget = 0.0f
-        playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
+        if (sound) playLidSound()
     }
+
+    fun playLidSound() = playSound(SoundEvents.ENTITY_SPIDER_STEP, 0.8f, 0.5f + rand.nextFloat() * 0.1f)
 
     private fun openGUI(player: EntityPlayer) {
         player.tags.add(MimicInventoryTag.composeMimicInventoryTag(this))
+        openLidFull(true)
+        inventoryOpenCount++
         player.openGui(
                 FriendlyMimicMod.instance,
                 FriendlyMimicMod.MIMIC_GUI_ID,
@@ -230,7 +249,8 @@ class EntityMimic : EntityTameable {
     companion object {
         const val HEALTH_FRIENDLY = 20.0
         const val HEALTH = 8.0
-        const val LID_ANGLE_HALF_OPEN = -(Math.PI / 4.0).toFloat()
+        const val LID_ANGLE_HALF = -(Math.PI / 4.0).toFloat()
+        const val LID_ANGLE_FULL = -(Math.PI / 2.0).toFloat()
         const val INVENTORY_SIZE = 27
 
         private const val KEY_ITEMS = "Items"
@@ -243,5 +263,6 @@ class EntityMimic : EntityTameable {
         private val INVENTORY_CONTENTS = Array<DataParameter<ItemStack>>(INVENTORY_SIZE) {
             EntityDataManager.createKey<ItemStack>(EntityMimic::class.java, DataSerializers.OPTIONAL_ITEM_STACK)
         }
+        private val INVENTORY_OPEN_COUNT = EntityDataManager.createKey<Int>(EntityMimic::class.java, DataSerializers.VARINT)
     }
 }
