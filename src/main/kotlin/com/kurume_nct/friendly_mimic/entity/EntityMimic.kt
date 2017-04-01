@@ -150,7 +150,7 @@ class EntityMimic : EntityTameable {
                     navigator.clearPathEntity()
                     attackTarget = null
                     aiSit.setSitting(true)
-                    health = HEALTH_FRIENDLY.toFloat()
+                    health = HEALTH_TAMED.toFloat()
                     ownerId = player.uniqueID
                     playTameEffect(true)
                 } else {
@@ -205,9 +205,9 @@ class EntityMimic : EntityTameable {
         super.applyEntityAttributes()
 
         getEntityAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).baseValue = 0.30000001192092896
-        getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).baseValue = if (isTamed) HEALTH_FRIENDLY else HEALTH
+        getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).baseValue = if (isTamed) HEALTH_TAMED else HEALTH
 
-        attributeMap.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).baseValue = 2.0
+        attributeMap.registerAttribute(SharedMonsterAttributes.ATTACK_DAMAGE).baseValue = 6.0
     }
 
     override fun onDeath(cause: DamageSource?) {
@@ -259,8 +259,8 @@ class EntityMimic : EntityTameable {
     }
 
     companion object {
-        const val HEALTH_FRIENDLY = 20.0
-        const val HEALTH = 8.0
+        const val HEALTH_TAMED = 40.0
+        const val HEALTH = 40.0
         const val LID_ANGLE_HALF = -(Math.PI / 4.0).toFloat()
         const val LID_ANGLE_FULL = -(Math.PI / 2.0).toFloat()
         const val INVENTORY_SIZE = 27
